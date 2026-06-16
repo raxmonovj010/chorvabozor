@@ -10,19 +10,29 @@ import { CATEGORIES, REGIONS } from "@/lib/utils";
 export default function ListingForm() {
   const [step, setStep] = useState(0);
   const [images, setImages] = useState<string[]>([]);
-  const [imgUrl, setImgUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { register, handleSubmit, setValue } = useForm<any>({ defaultValues: { count: 1 } });
 
-  const addImageUrl = () => {
-    if (!imgUrl.trim()) return;
-    setImages(p => [...p, imgUrl.trim()]);
-    setImgUrl("");
+  const uploadImg = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files?.length) return;
+    setUploading(true);
+    for (let i = 0; i < files.length; i++) {
+      const fd = new FormData();
+      fd.append("file", files[i]!);
+      try {
+        const res = await fetch("/api/upload", { method: "POST", body: fd });
+        const d = await res.json();
+        setImages(p => [...p, d.url]);
+      } catch { toast.error("Yuklanmadi"); }
+    }
+    setUploading(false);
   };
 
   const onSubmit = async (data: any) => {
-    if (images.length === 0) { toast.error("Kamida 1 rasm URL si kerak"); return; }
+    if (images.length === 0) { toast.error("Kamida 1 rasm"); return; }
     setLoading(true);
     try {
       const res = await fetch("/api/listings", {
@@ -110,18 +120,18 @@ export default function ListingForm() {
 
       {step === 3 && (
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold mb-4">Rasmlar (URL)</h2>
-          <div className="flex gap-2">
-            <input type="text" value={imgUrl} onChange={e => setImgUrl(e.target.value)} placeholder="Rasm URL sini kiriting" className="flex-1 px-4 py-2.5 border rounded-lg text-sm" />
-            <Button type="button" variant="outline" onClick={addImageUrl}>Qo'shish</Button>
-          </div>
+          <h2 className="text-lg font-semibold mb-4">Rasmlar</h2>
           <div className="grid grid-cols-4 gap-2">
             {images.map((url, i) => (
               <div key={i} className="relative h-20 bg-gray-100 rounded-lg overflow-hidden">
-                <img src={url} alt="" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).src = "https://via.placeholder.com/150?text=Error"; }} />
+                <img src={url} alt="" className="w-full h-full object-cover" />
                 <button type="button" onClick={() => setImages(p => p.filter((_, j) => j !== i))} className="absolute top-0.5 right-0.5 bg-red-500 text-white w-5 h-5 rounded-full text-xs">x</button>
               </div>
             ))}
+            {images.length < 8 && <label className="h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-primary">
+              <span className="text-2xl text-gray-400">{uploading ? "..." : "+"}</span>
+              <input type="file" accept="image/*" multiple className="hidden" onChange={uploadImg} disabled={uploading} />
+            </label>}
           </div>
           <p className="text-xs text-gray-400">{images.length}/8 rasm</p>
           <div className="flex gap-3 pt-3">

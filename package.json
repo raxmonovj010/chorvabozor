@@ -2,8 +2,14 @@
   "name": "chorvabozor",
   "version": "1.0.0",
   "private": true,
-  "scripts": { "dev": "next dev", "build": "next build", "start": "next start" },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
   "dependencies": {
+    "@hookform/resolvers": "^3.9.1",
+    "@supabase/supabase-js": "^2.108.2",
     "mongoose": "^8.9.5",
     "next": "14.2.21",
     "next-auth": "^4.24.11",
@@ -11,8 +17,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.5.2",
-    "zod": "^3.24.2",
-    "@hookform/resolvers": "^3.9.1"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^20.17.12",
